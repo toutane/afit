@@ -9,14 +9,21 @@ primitives to suit maths conventions.
 (** Sign function
     @param x integer
  *)
-let sign x = 0 ;;
+let sign x =
+  if x >= 0 then 1
+  else -1
+;;
 
 (** Quotient of an integer by a natural number.
     This is the quotient in euclidiant division sense.
     @param a dividend
     @param b natural number you divide by.
  *)
-let quot a b = 0 ;;
+let quot a b =
+  let q = a / b
+  in if a mod b >= 0 then q
+     else q - 1
+;;
 
 (** Quotient of two integers. Fully Recursive.
     General case ; explicit by-hand computations. Not efficient enough as
@@ -33,7 +40,13 @@ let quot a b = 0 ;;
     @param a input integer
     @param b moduli integer.
  *)
-let modulo a b = 0 ;;
+let modulo a b =
+  let r = a mod b
+  in if r >= 0 then r
+     else
+       if b >= 0 then r + b
+       else r - b
+;;
 
 (** Division of an integer by a natural number. NOT OCAML DEFAULT.
     Division of an integer by a non-zero integer b is the unique couple
@@ -41,4 +54,4 @@ let modulo a b = 0 ;;
     @param a dividend
     @param b integer you divide by.
 *)
-let div a b = (0, 0) ;;
+let div a b = (quot a b, modulo a b) ;;
