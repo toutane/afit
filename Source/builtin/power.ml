@@ -7,20 +7,39 @@ open Basic_arithmetics
     @param x base
     @param n exponent
  *)
-let pow x n = 0
+let pow x n =
+  let rec multi i =
+    if i = 0 then 1
+    else x * multi (i - 1) 
+  in multi n
+;;
 
 (** Fast integer exponentiation function. Logarithmic complexity.
     @param x base
     @param n exponent
  *)
-let power x n = 0
+let power x n =
+  let rec multi_f x i =
+    if i = 0 then 1
+    else
+      if modulo i 2 = 0 then multi_f (x*x) (quot i 2)
+      else x * multi_f (x*x) (quot (i - 1) 2)
+  in multi_f x n
+;;
 
 (** Fast modular exponentiation function. Logarithmic complexity.
     @param x base
     @param n exponent
     @param m modular base
  *)
-let mod_power x n m = 0
+let mod_power x n m =
+  let rec multi_mf x i =
+    if i = 0 then 1
+    else let k = if modulo i 2 = 0 then multi_mf (x*x) (quot i 2)
+                 else x * multi_mf (x*x) (quot (i - 1) 2 )
+         in modulo k m
+  in multi_mf x n  
+;;
 
 (** Fast modular exponentiation function mod prime. Logarithmic complexity.
     It makes use of the Little Fermat Theorem.
@@ -28,4 +47,12 @@ let mod_power x n m = 0
     @param n exponent
     @param p prime modular base
  *)
-let prime_mod_power x n p = 0
+let prime_mod_power x n p =
+  if x = 0 then 0
+  else let rec multi_mf x i =
+         if i = 0 || i = p - 1 then 1
+         else let k = if modulo i 2 = 0 then multi_mf (x*x) (quot i 2)
+                      else x * multi_mf (x*x) (quot (i - 1) 2 )
+              in modulo k p
+       in multi_mf x n
+;;
