@@ -6,12 +6,32 @@ open Basic_arithmetics
 (** List composed of 2 and then odd integers starting at 3.
     @param n limit of list of odd integers, minimum value is 2.
  *)
-let init_eratosthenes n = []
+let init_eratosthenes n =
+  let rec add_to_list x =
+    match x with
+      x when x + 2 > n -> [x]
+    | x -> x::(add_to_list (x + 2)) 
+  in if n < 3 then [n]
+     else 2::add_to_list 3
+;;
 
 (** Eratosthene sieve.
     @param n limit of list of primes, starting at 2.
-*)
-let eratosthenes n = []
+ *)
+(*
+let eratosthenes n =
+  let prime_list = init_eratosthenes n in
+  let supp_multiple x list =
+    let rec supp_rec = function
+        [] -> []
+      | e::l -> if modulo x e = 0 then supp_rec l
+                else e::(supp_rec l)
+    in supp_rec list
+  in let rec chek_primality = function
+         [] -> []
+       | e::l -> 
+         
+;;*)
 
 (** Write a list into a file. Element seperator is newline.
     @param file path to write to.
