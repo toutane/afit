@@ -18,32 +18,37 @@ let init_eratosthenes n =
 (** Eratosthene sieve.
     @param n limit of list of primes, starting at 2.
  *)
-(*
 let eratosthenes n =
-  let prime_list = init_eratosthenes n in
-  let supp_multiple x list =
-    let rec supp_rec = function
-        [] -> []
-      | e::l -> if modulo x e = 0 then supp_rec l
-                else e::(supp_rec l)
-    in supp_rec list
-  in let rec chek_primality = function
+  let supp_divisor n l =
+    let rec list_browsing = function
+      [] -> []
+      | e::l -> if (modulo e n) = 0 then list_browsing l
+                else e::(list_browsing l)
+    in list_browsing l
+  in let rec check_list = function
          [] -> []
-       | e::l -> 
-         
-;;*)
+       | e::l -> e::(check_list (supp_divisor e l))
+     in check_list (init_eratosthenes n)
+;;
 
 (** Write a list into a file. Element seperator is newline.
     @param file path to write to.
  *)
-let write_list li file = ()
+let write_list li file =
+  let oc = open_out file in
+  let rec aux = function
+      [] -> close_out oc
+    | e::l -> Printf.fprintf oc "%n\n" e; aux l
+  in aux li
+;;
 
 (** Write a list of prime numbers up to limit into a txt file.
     @param n limit of prime numbers up to which to build up a list of primes.
     @param file path to write to.
 *)
-let write_list_primes n file = ()
-
+let write_list_primes n file = 
+  write_list (eratosthenes n) file
+;;
 
 (** Read file safely ; catch End_of_file exception.
     @param in_c input channel.
@@ -66,7 +71,10 @@ let create_list in_c =
 (** Load list of primes into OCaml environment.
     @param file path to load from.
  *)
-let read_list_primes file = []
+let read_list_primes file =
+  let ic = open_in file in
+  create_list ic
+ ;;
 
 (** Get biggest prime.
     @param l list of prime numbers.
@@ -89,10 +97,30 @@ let rec last_two l = match l with
     @param limit positive integer bounding searched for primes.
     @param isprime function testing for (pseudo)primality.
  *)
-let double_primes limit isprime = []
+let double_primes limit isprime =
+  let rec build_list = function
+    x when x = limit -> []
+  | x -> if (isprime x) then
+           let dp = x * 2 + 1 in
+           if (isprime dp) then
+             (x, dp)::(build_list (x + 1))
+           else build_list (x + 1)
+         else build_list (x + 1)
+  in build_list 2
+;;
 
 (** Finding twin primes.
     @param limit positive integer bounding searched for primes.
     @param isprime function testing for (pseudo)primality.
  *)
-let twin_primes limit isprime = []
+let twin_primes limit isprime =
+  let rec build_list = function
+      x when x = limit -> []
+    | x -> if (isprime x) then
+             let twin = x + 2 in
+             if (isprime twin) then
+               (x, twin)::(build_list (x + 1))
+             else build_list (x + 1)
+           else build_list (x + 1)
+  in build_list 2
+;;
