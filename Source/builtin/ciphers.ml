@@ -86,23 +86,46 @@ let decrypt_rsa m (n , d) =
     where p is prime and g primitive root in F_p.
     @param p is prime having form 2*q + 1 for prime q.
  *)
-let rec public_data_g p = (0, 0)
+(*let rec public_data_g p = (0, 0)*)
+let public_data_g p =
+  let rec get_g x exp next =
+    if next != 1 then
+      get_g x (exp + 1) (modulo (next * x) p)
+    else
+      if exp = (p - 1) then x
+      else get_g (x + 1) exp (modulo (x + 1) p)
+  in (get_g 1 1 (modulo 1 p), p)
+;;
+
+(*public_data_g 11;;*)
 
 (** Generate ElGamal public and private keys.
     @param pub_data a tuple (g, p) of public data for ElGamal cryptosystem.
  *)
-let generate_keys_g (g, p) = (0, 0)
+let generate_keys_g (g, p) =
+  let x = (p - 1) in
+  (mod_power g x p, x)
+;;
 
 (** ElGamal encryption process.
     @param msg message to be encrypted.
     @param pub_data a tuple (g, p) of ElGamal public data.
     @param kA ElGamal public key.
  *)
-let encrypt_g msg (g, p) kA = (0, 0)
+let encrypt_g msg (g, p) kA =
+  let rec get_random_k k =
+    if modulo k (p - 1) = 0 then k
+    else get_random_k (k + 1)
+  in let k = get_random_k 2 in
+     let a = mod_power g k p and b = modulo ((power kA k) * msg) p
+     in (a, b)
+;;
 
 (** ElGamal decryption process.
     @param msg a tuple (msgA, msgB) forming an encrypted ElGamal message.
     @param a private key
     @param pub_data a tuple (g, p) of public data for ElGamal cryptosystem.
  *)
-let decrypt_g (msgA, msgB) a (g, p) = 0
+let decrypt_g (msgA, msgB) a (g, p) =
+  modulo (quot msgB (power msgA a)) p
+;;
