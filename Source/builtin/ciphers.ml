@@ -5,7 +5,7 @@
 open Builtin
 open Basic_arithmetics
 open Power
-
+   
 (********** Cesar Cipher **********)
 
 (** Cesar's cipher encryption
@@ -56,12 +56,6 @@ let generate_keys_rsa p q =
    
 ;;
 
-(*
-generate_keys_rsa 9967 9973;;
-generate_keys_rsa 3 11;;
-gcd ((9967 - 1) * (9973 - 1)) 5;;  
- *)
-
 (** Encryption using RSA cryptosystem.
     @param m integer hash of message
     @param pub_key a tuple (n, e) composing public key of RSA cryptosystem.
@@ -86,18 +80,18 @@ let decrypt_rsa m (n , d) =
     where p is prime and g primitive root in F_p.
     @param p is prime having form 2*q + 1 for prime q.
  *)
-(*let rec public_data_g p = (0, 0)*)
-let public_data_g p =
-  let rec get_g x exp next =
-    if next != 1 then
-      get_g x (exp + 1) (modulo (next * x) p)
-    else
-      if exp = (p - 1) then x
-      else get_g (x + 1) exp (modulo (x + 1) p)
-  in (get_g 1 1 (modulo 1 p), p)
+let rec public_data_g p =
+  let x = 2 + Random.int p in
+  let isXPrimitive x =
+    if (mod_power x (p - 1) p) = 1 then
+      (if (mod_power x 2 p != 1) then
+        (if (mod_power x ((p - 1) / 2) p) != 1 then true
+         else false)
+       else false)
+    else false
+  in if isXPrimitive x then (x, p)
+     else public_data_g p 
 ;;
-
-(*public_data_g 11;;*)
 
 (** Generate ElGamal public and private keys.
     @param pub_data a tuple (g, p) of public data for ElGamal cryptosystem.
@@ -112,6 +106,7 @@ let generate_keys_g (g, p) =
     @param pub_data a tuple (g, p) of ElGamal public data.
     @param kA ElGamal public key.
  *)
+
 let encrypt_g msg (g, p) kA =
   let rec get_random_k k =
     if modulo k (p - 1) = 0 then k
