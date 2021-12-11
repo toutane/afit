@@ -15,24 +15,84 @@ down code.
 (** Creates a bitarray from a built-in integer.
     @param x built-in integer.
 *)
-let from_int x = []
-
+let from_int x =
+  if x = 0 then []
+  else (
+    let rec inc i = function
+        [] -> []
+      | b1::l -> if i = 1 then (
+                   if b1 = 0 then 1::l
+                   else 0::(inc (i + 1) l)
+                 )
+                 else (
+                   if b1 = 1 then 0::(inc (i + 1) l)
+                   else 1::l
+                 )
+    in let rec comp check = function
+           [] -> []
+          |	e::l -> if e = 0 && (not check) then e::(comp false l) 
+                        else (
+                          if e = 1 then 0::(comp true l)
+                          else 1::(comp true l)
+		        )
+       in let rec dec_to_bin n =
+            if n <> 0 then (n mod 2)::(dec_to_bin (n / 2))
+            else []
+          in let int_to_twoscomp n =
+               if n >= 0 then 0::(dec_to_bin n)
+               else (
+                 let arr = dec_to_bin (-n)
+                 in 1::(inc 1 (comp false arr)) 
+               )
+             in int_to_twoscomp x
+  )
+;;
+              
 (** Transforms bitarray of built-in size to built-in integer.
     UNSAFE: possible integer overflow.
     @param bA bitarray object.
  *)
-let to_int bA = 0
+let to_int bA =
+  if bA = [] then 0
+  else (
+    let pow x n =
+      let rec multi i =
+        if i = 0 then 1
+        else x * multi (i - 1) 
+      in multi n
+    in let rec bin_to_dec = function
+           [] -> 0
+         | b::l -> (bin_to_dec l) * 2 + b
+       in let rec twoscomp_to_int arr =
+            match arr with
+              [] -> 0
+            | e::l -> let n = bin_to_dec l in
+                      if e = 0 then n
+                      else (
+                        let rec dec p = function
+                            [] -> 0
+                          | b::l -> (dec (p + 1) l) - (pow 2 p) * b
+                        in dec 0 (arr))
+          in twoscomp_to_int bA
+  )
+;;
 
 (** Prints bitarray as binary number on standard output.
     @param bA a bitarray.
   *)
-let print_b bA = ()
+let print_b bA =
+  print_string "[ ";
+  let rec print = function
+      [] -> ()
+    | b::l -> print_int b; print_string "; "; print l
+      in print bA
+;;
 
 (** Toplevel directive to use print_b as bitarray printer.
     CAREFUL: print_b is then list int printer.
     UNCOMMENT FOR TOPLEVEL USE.
 *)
-(* #install_printer print_b *)
+#install_printer print_b
 
 (** Internal comparisons on bitarrays and naturals. Naturals in this
     context are understood as bitarrays missing a bit sign and thus
