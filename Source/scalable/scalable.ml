@@ -56,7 +56,10 @@ let print_b bA =
 *)
 (*#install_printer print_b*)
 
-(** Internal comparisons on bitarrays and naturals. Naturals in this
+(** Intelet rec inverse newList = function
+    | [] -> newList
+    | e :: l -> inverse l (e :: newList)
+  inrnal comparisons on bitarrays and naturals. Naturals in this
     context are understood as bitarrays missing a bit sign and thus
     assumed to be non-negative.
 *)
@@ -79,7 +82,7 @@ let rec compare_n nA nB =
     | [], [] -> 0
     | [], _ | _, [] -> 0
     | e1 :: l1, e2 :: l2 ->
-        if e1 = e2 then compare (l1, l2) else if e1 > e2 then 1 else -1
+        if e1 = e2 then compare (l1, l2) else if e1 > e2 then -1 else 1
   in
   if lenA = lenB then compare (inverse nA [], inverse nB [])
   else if lenA > lenB then 1
@@ -90,14 +93,14 @@ let rec compare_n nA nB =
     @param nA natural.
     @param nB natural.
  *)
-let ( >>! ) nA nB = true
+let ( >>! ) nA nB = match compare_n nA nB with 1 -> true | _ -> false
 
 (** Smaller inorder comparison operator on naturals. Returns true if
     first argument is smaller than second and false otherwise.
     @param nA natural.
     @param nB natural.
  *)
-let ( <<! ) nA nB = true
+let ( <<! ) nA nB = match compare_n nA nB with -1 -> true | _ -> false
 
 (** Bigger or equal inorder comparison operator on naturals. Returns
     true if first argument is bigger or equal to second and false
@@ -105,7 +108,7 @@ let ( <<! ) nA nB = true
     @param nA natural.
     @param nB natural.
  *)
-let ( >=! ) nA nB = true
+let ( >=! ) nA nB = match compare_n nA nB with -1 -> false | _ -> true
 
 (** Smaller or equal inorder comparison operator on naturals. Returns
     true if first argument is smaller or equal to second and false
@@ -113,28 +116,36 @@ let ( >=! ) nA nB = true
     @param nA natural.
     @param nB natural.
  *)
-let ( <=! ) nA nB = true
+let ( <=! ) nA nB = match compare_n nA nB with 1 -> false | _ -> true
 
 (** Comparing two bitarrays. Output is 1 if first argument is bigger
     than second -1 otherwise.
     @param bA A bitarray.
     @param bB A bitarray.
 *)
-let compare_b bA bB = 10
+let compare_b bA bB =
+  let rec areSignsSame = function
+    | [], [] -> 0
+    | [], l -> areSignsSame ([ 0; 0 ], l)
+    | l, [] -> areSignsSame (l, [ 0; 0 ])
+    | e1 :: l1, e2 :: l2 ->
+        if e1 = e2 then compare_n l1 l2 else if e1 > e2 then -1 else 1
+  in
+  areSignsSame (bA, bB)
 
 (** Bigger inorder comparison operator on bitarrays. Returns true if
     first argument is bigger than second and false otherwise.
     @param nA natural.
     @param nB natural.
  *)
-let ( >> ) bA bB = true
+let ( >> ) bA bB = match compare_b bA bB with 1 -> true | _ -> false
 
 (** Smaller inorder comparison operator on bitarrays. Returns true if
     first argument is smaller than second and false otherwise.
     @param nA natural.
     @param nB natural.
  *)
-let ( << ) bA bB = true
+let ( << ) bA bB = match compare_b bA bB with -1 -> true | _ -> false
 
 (** Bigger or equal inorder comparison operator on bitarrays. Returns
     true if first argument is bigger or equal to second and false
@@ -142,7 +153,7 @@ let ( << ) bA bB = true
     @param nA natural.
     @param nB natural.
  *)
-let ( >>= ) bA bB = true
+let ( >>= ) bA bB = match compare_b bA bB with -1 -> false | _ -> true
 
 (** Smaller or equal inorder comparison operator on naturals. Returns
     true if first argument is smaller or equal to second and false
@@ -150,17 +161,18 @@ let ( >>= ) bA bB = true
     @param nA natural.
     @param nB natural.
  *)
-let ( <<= ) bA bB = true
+let ( <<= ) bA bB = match compare_b bA bB with 1 -> false | _ -> true
 
 (** Sign of a bitarray.
     @param bA Bitarray.
 *)
-let sign_b bA = 10
+let sign_b bA = match bA with [] -> 1 | e :: _ -> if e = 0 then 1 else -1
 
 (** Absolute value of bitarray.
     @param bA Bitarray.
 *)
-let abs_b bA = []
+let abs_b bA =
+  match bA with [] -> [] | e :: l -> if e = 0 then e :: l else 0 :: l
 
 (** Quotient of integers smaller than 4 by 2.
     @param a Built-in integer smaller than 4.
@@ -181,38 +193,116 @@ let _div_t a = (_quot_t a, _mod_t a)
     @param nA Natural.
     @param nB Natural.
 *)
-let add_n nA nB = []
+let add_n nA nB =
+  let rec addition carry = function
+    | [], [] -> if carry = 0 then [] else addition carry ([ 0 ], [ 0 ])
+    | [], l -> addition carry ([ 0 ], l)
+    | l, [] -> addition carry (l, [ 0 ])
+    | e1 :: l1, e2 :: l2 -> (
+        match (e1, e2) with
+        | 0, 0 ->
+            if carry = 0 then 0 :: addition carry (l1, l2)
+            else 1 :: addition (carry - 1) (l1, l2)
+        | 0, 1 | 1, 0 ->
+            if carry = 0 then 1 :: addition carry (l1, l2)
+            else 0 :: addition carry (l1, l2)
+        | _ ->
+            if carry = 0 then 0 :: addition (carry + 1) (l1, l2)
+            else 1 :: addition carry (l1, l2))
+  in
+  addition 0 (nA, nB)
 
 (** Difference of two naturals.
     UNSAFE: First entry is assumed to be bigger than second.
     @param nA Natural.
     @param nB Natural.
 *)
-let diff_n nA nB = []
+let diff_n nA nB =
+  let rec length = function [] -> 0 | _ :: l -> 1 + length l in
+  let rec troncate n = function
+    | [] -> []
+    | e :: l -> if n > 0 then e :: troncate (n - 1) l else []
+  in
+  let rec inverse newList = function
+    | [] -> newList
+    | e :: l -> inverse l (e :: newList)
+  in
+  let rec compenseLength len list =
+    if len > 0 then
+      match list with
+      | [] -> 0 :: compenseLength (len - 1) []
+      | e :: l -> e :: compenseLength (len - 1) l
+    else []
+  in
+  let rec comp = function
+    | [] -> []
+    | e :: l -> if e = 0 then 1 :: comp l else 0 :: comp l
+  in
+  let twoscomp = add_n (comp (compenseLength (length nA) nB)) [ 1 ] in
+  inverse (troncate (length nA) (add_n nA twoscomp)) []
 
 (** Addition of two bitarrays.
     @param bA Bitarray.
     @param bB Bitarray.
  *)
-let add_b bA bB = []
+let add_b bA bB =
+  match (bA, bB) with
+  | [], [] -> []
+  | e1 :: l1, e2 :: l2 -> (
+      match (e1, e2) with
+      | 0, 0 -> 0 :: add_n l1 l2
+      | 0, 1 -> 0 :: diff_n l1 l2
+      | 1, 0 -> 1 :: diff_n l2 l1
+      | _, _ -> 1 :: add_n l1 l2)
+  | [], l | l, [] -> l
 
 (** Difference of two bitarrays.
     @param bA Bitarray.
     @param bB Bitarray.
 *)
-let diff_b bA bB = []
+let diff_b bA bB =
+  match (bA, bB) with
+  | [], [] -> []
+  | e1 :: l1, e2 :: l2 -> (
+      match (e1, e2) with
+      | 0, 0 -> 0 :: diff_n l1 l2
+      | 0, 1 -> add_b bA bB
+      | 1, 0 -> 1 :: add_b bB bA
+      | _, _ -> add_b (0 :: l2) bA)
+  | [], l | l, [] -> l
 
 (** Shifts bitarray to the left by a given natural number.
     @param bA Bitarray.
     @param d Non-negative integer.
 *)
-let rec shift bA d = []
+let shift bA d =
+  match bA with
+  | [] -> []
+  | e :: l ->
+      let rec addZero n = if n > 0 then 0 :: addZero (n - 1) else l in
+      e :: addZero d
 
 (** Multiplication of two bitarrays.
     @param bA Bitarray.
     @param bB Bitarray.
 *)
-let mult_b bA bB = []
+let mult_b bA bB = 1
+(*let rec multiply b n =
+    if compare_n n [ 0; 1 ] >= 0 then (
+      print_b n;
+      print_newline ();
+      add_n (multiply b (diff_n n [ 1 ])) b)
+    else [ 1 ]
+  in
+  match (bA, bB) with
+  | [], [] -> []
+  | e1 :: l1, e2 :: l2 -> (
+      match (e1, e2) with
+      | 0, 0 -> multiply l1 l2
+      | 0, 1 -> add_b bA bB
+      | 1, 0 -> 1 :: add_b bB bA
+      | _, _ -> add_b (0 :: l2) bA)
+  | [], l | l, [] -> []*)
 
 (** Quotient of two bitarrays.
     @param bA Bitarray you want to divide by second argument.
