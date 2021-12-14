@@ -293,18 +293,21 @@ let add_b bA bB =
     @param bB Bitarray.
 *)
 let rec diff_b bA bB =
-  match (bA, bB) with
-  | [], [] -> []
-  | e1 :: l1, e2 :: l2 -> (
-      match (e1, e2) with
-      | 0, 0 ->
-          if compare_n l1 l2 > 0 then 0 :: diff_n l1 l2 else 1 :: diff_n l2 l1
-      | 0, 1 -> add_b bA bB
-      | 1, 0 -> 1 :: add_n l1 l2
-      | _, _ ->
-          if compare_n l1 l2 > 0 then 1 :: diff_n l1 l2 else 0 :: diff_n l2 l1)
-  | [], l -> ( match l with _ :: k -> 1 :: k | _ -> [])
-  | l, [] -> l
+  if bA = bB then []
+  else
+    match (bA, bB) with
+    | [], [] -> []
+    | e1 :: l1, e2 :: l2 -> (
+        match (e1, e2) with
+        | 0, 0 ->
+            if compare_n l1 l2 > 0 then 0 :: diff_n l1 l2 else 1 :: diff_n l2 l1
+        | 0, 1 -> add_b bA (0 :: l2)
+        | 1, 0 -> 1 :: add_n l1 l2
+        | _, _ ->
+            if compare_n l1 l2 > 0 then 1 :: diff_n l1 l2 else 0 :: diff_n l2 l1
+        )
+    | [], l -> ( match l with _ :: k -> 1 :: k | _ -> [])
+    | l, [] -> l
 
 (** Shifts bitarray to the left by a given natural number.
     @param bA Bitarray.
@@ -351,9 +354,9 @@ let quot_b bA bB =
             match (e1, e2) with
             | 0, 0 -> 0 :: divide_mod l1 l2
             | 0, 1 -> (
-                match divide_mod l1 l2 with [] -> [] | _ :: l -> 1 :: l)
+                match divide_mod l1 l2 with [] -> [] | e :: l -> 1 :: e :: l)
             | 1, 0 -> (
-                match divide_mod l1 l2 with [] -> [] | _ :: l -> 1 :: l)
+                match divide_mod l1 l2 with [] -> [] | e :: l -> 1 :: e :: l)
             | _ -> 0 :: divide_mod l1 l2))
     | _ -> []
   in
@@ -391,8 +394,10 @@ let mod_b bA bB =
         | _ -> (
             match (e1, e2) with
             | 0, 0 -> 0 :: divide l1 l2
-            | 0, 1 -> ( match divide l1 l2 with [] -> [] | _ :: l -> 1 :: l)
-            | 1, 0 -> ( match divide l1 l2 with [] -> [] | _ :: l -> 1 :: l)
+            | 0, 1 -> (
+                match divide l1 l2 with [] -> [] | e :: l -> 1 :: e :: l)
+            | 1, 0 -> (
+                match divide l1 l2 with [] -> [] | e :: l -> 1 :: e :: l)
             | _ -> 0 :: divide l1 l2))
     | _ -> []
   in
