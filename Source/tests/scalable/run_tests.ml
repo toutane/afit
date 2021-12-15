@@ -10,8 +10,12 @@ open Test_scalable_ciphers
 open Test_scalable_break_ciphers
 
 let scalable_test_suite =
-    [("scalable_basic_arithmetics",  basic_arithmetics_set);
-     ("scalable_power",              power_set);
-     ("scalable_test_primes",        test_primes_set)]
+  [
+    ("scalable_basic_arithmetics", basic_arithmetics_set);
+    ("scalable_power", power_set);
+    ("scalable_test_primes", test_primes_set);
+    ("scalable_generate_primes", generate_primes_set);
+    ("scalable_ciphers", ciphers_set);
+  ]
 
-let () = run_to_xml "trace_scalable_1.xml" [scalable_test_suite]
+let () = run_to_xml "trace_scalable_1.xml" [ scalable_test_suite ]
