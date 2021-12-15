@@ -71,7 +71,7 @@ let print_b bA =
     @param nB A natural.
 *)
 
-(*let rec compare_n nA nB =
+let rec compare_n nA nB =
   let rec inverse newList = function
     | [] -> newList
     | e :: l -> inverse (e :: newList) l
@@ -94,9 +94,7 @@ let print_b bA =
     | e1 :: l1, e2 :: l2 ->
         if e1 = e2 then compare (l1, l2) else if e1 > e2 then 1 else -1
   in
-  if lenA = lenB then compare (tnA, tnB) else if lenA > lenB then 1 else -1*)
-let compare_n a b =
-  if a = b then 0 else if to_int (0 :: a) > to_int (0 :: b) then 1 else -1
+  if lenA = lenB then compare (tnA, tnB) else if lenA > lenB then 1 else -1
 
 (** Bigger inorder comparison operator on naturals. Returns true if
     first argument is bigger than second and false otherwise.
@@ -228,11 +226,7 @@ let add_n nA nB =
     @param nA Natural.
     @param nB Natural.
 *)
-let diff_n a b =
-  match from_int (to_int (0 :: a) - to_int (0 :: b)) with
-  | [] -> []
-  | e :: l -> l
-(*let diff_n nA nB =
+let diff_n nA nB =
   let rec inverse newList = function
     | [] -> newList
     | e :: l -> inverse (e :: newList) l
@@ -260,9 +254,7 @@ let diff_n a b =
             if carry = 0 then 0 :: substract carry (l1, l2)
             else 1 :: substract carry (l1, l2))
   in
-  inverse [] (trim (inverse [] (substract 0 (nA, nB))))*)
-
-(*let add_b bA bB = from_int (to_int bA + to_int bB)*)
+  inverse [] (trim (inverse [] (substract 0 (nA, nB))))
 
 (** Addition of two bitarrays.
     @param bA Bitarray.
@@ -285,8 +277,6 @@ let add_b bA bB =
     @param bA Bitarray.
     @param bB Bitarray.
 *)
-(*let diff_b bA bB = from_int (to_int bA - to_int bB)*)
-
 let rec diff_b bA bB =
   if bA = bB then []
   else
@@ -315,6 +305,10 @@ let shift bA d =
       let rec addZero n = if n > 0 then 0 :: addZero (n - 1) else l in
       e :: addZero d
 
+(** Multiplication of two bitarrays.
+    @param bA Bitarray.
+    @param bB Bitarray.
+*)
 let mult_b bA bB =
   let rec multiply a b res =
     if b <> [] then
@@ -335,52 +329,6 @@ let mult_b bA bB =
       | 0, 1 -> 1 :: multiply l1 l2 []
       | 1, 0 -> 1 :: multiply l1 l2 []
       | _ -> 0 :: multiply l1 l2 [])
-(*
-  let rec multiply a b res =
-    if b > 0 then
-      let res2 = add_b res a in
-      multiply a (b - 1) res2
-    else []
-    (*let rec multiply a b =
-      (*print_int b;
-        print_newline ();*)
-      if b > 0 then add_b (multiply a (b - 1)) a else []*)
-    (*if compare_n b [ 1 ] > -1 then add_b (multiply a (diff_n b [ 1 ])) a else []*)
-  in
-  match (bA, bB) with
-  | [], [] | [], _ | _, [] -> []
-  | [ 0; 1 ], b | b, [ 0; 1 ] -> b
-  | e1 :: l1, e2 :: l2 -> (
-      match (e1, e2) with
-      | 0, 0 -> multiply bA (to_int (0 :: l2)) []
-      | 0, 1 -> (
-          match multiply bA (to_int (0 :: l2)) [] with
-          | [] -> []
-          | _ :: l -> 1 :: l)
-      | 1, 0 -> (
-          match multiply bB (to_int (0 :: l1)) [] with
-          | [] -> []
-          | _ :: l -> 1 :: l)
-      | _ -> multiply (0 :: l1) (to_int (0 :: l2)) [])*)
-
-(** Multiplication of two bitarrays.
-    @param bA Bitarray.
-    @param bB Bitarray.
-*)
-(*let mult_b bA bB = from_int (to_int bA * to_int bB)*)
-
-(* in
-   match (bA, bB) with
-   | [], [] | [], _ | _, [] -> []
-   | [ 0; 1 ], b | b, [ 0; 1 ] -> b
-   | e1 :: l1, e2 :: l2 -> (
-       match (e1, e2) with
-       | 0, 0 -> multiply bA (to_int l2)
-       | 0, 1 -> (
-           match multiply bA (to_int l2) with [] -> [] | _ :: l -> 1 :: l)
-       | 1, 0 -> (
-           match multiply bB (to_int l1) with [] -> [] | _ :: l -> 1 :: l)
-       | _ -> multiply (0 :: l1) (to_int l2))*)
 
 (** Quotient of two bitarrays.
     @param bA Bitarray you want to divide by second argument.
@@ -451,11 +399,6 @@ let quot_b bA bB =
   let r = diff_b bA (mult_b bB signQ) in
   if sign_b r = -1 then diff_b signQ [ 0; 1 ] else signQ
 
-(*print_b signQ;
-  print_newline ()*)
-(*print_b q;
-  print_newline ()*)
-
 (** Modulo of a bitarray against a positive one.
     @param bA Bitarray the modulo of which you're computing.
     @param bB Bitarray which is modular base.
@@ -471,28 +414,6 @@ let mod_b bA bB =
   if sign_b r2 >= 0 then r2
   else if sign_b bB >= 0 then add_b bB r2
   else diff_b r2 bB
-(*
-  let rec divide a b = if compare_n a b < 0 then a else divide (diff_n a b) b in
-  let matching =
-    match (bA, bB) with
-    | e1 :: l1, e2 :: l2 -> (
-        match compare_n l1 l2 with
-        | -1 -> bA
-        | _ -> (
-            match (e1, e2) with
-            | 0, 0 -> 0 :: divide l1 l2
-            | 0, 1 -> (
-                match divide l1 l2 with [] -> [] | e :: l -> 1 :: e :: l)
-            | 1, 0 -> (
-                match divide l1 l2 with [] -> [] | e :: l -> 1 :: e :: l)
-            | _ -> 0 :: divide l1 l2))
-    | _ -> []
-  in
-  let res = matching in
-  if res = [ 0 ] then []
-  else if sign_b res = 1 then res
-  else if sign_b bB = 1 then add_b bB res
-  else diff_b res bB *)
 
 (** Integer division of two bitarrays.
     @param bA Bitarray you want to divide.
