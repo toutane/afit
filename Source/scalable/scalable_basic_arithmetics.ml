@@ -6,6 +6,7 @@ open Scalable
     @param bA non-zero bitarray.
     @param bB non-zero bitarray.
 *)
+
 let rec gcd_b bA bB = if bB = [] then bA else gcd_b bB (mod_b bA bB)
 
 (** Extended euclidean division of two integers NOT OCAML DEFAULT.
@@ -25,14 +26,3 @@ let bezout_b bA bB =
         (diff_b v1 (mult_b q v2))
   in
   loop bA [ 0; 1 ] [] bB [] [ 0; 1 ]
-
-(*
-let bezout a b =
-  let rec loop r1 u1 v1 r2 u2 v2 =
-    if r2 = 0 then (u1, v1, r1)
-    else
-      let q = quot r1 r2 in
-      loop r2 u2 v2 (r1 - (q * r2)) (u1 - (q * u2)) (v1 - (q * v2))
-  in
-  loop a 1 0 b 0 1
-*)

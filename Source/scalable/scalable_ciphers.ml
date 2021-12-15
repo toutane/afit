@@ -14,7 +14,21 @@ open Scalable_power
     @param p prime bitarray
     @param q prime bitarray
 *)
-let generate_keys_rsa p q = (([],[]), ([], []))
+let generate_keys_rsa p q =
+  let n = mult_b p q
+  and phi = mult_b (diff_b p [ 0; 1 ]) (diff_b q [ 0; 1 ])
+  and e = [ 0; 1; 0; 1 ] in
+  if compare_b (gcd_b phi e) [ 0; 1 ] != 0 then
+    let rec find_e x =
+      if compare_b (gcd_b phi x) [ 0; 1 ] == 0 then x
+      else find_e (add_b x [ 0; 0; 1 ])
+    in
+    let new_e = find_e (add_b e [ 0; 0; 1 ]) in
+    let d, _, _ = bezout_b new_e phi in
+    ((n, new_e), (n, d))
+  else
+    let d, _, _ = bezout_b e phi in
+    ((n, e), (n, d))
 
 (** Encryption using RSA cryptosystem.
     @param m bitarray hash of message
@@ -26,7 +40,7 @@ let encrypt_rsa m (n, e) = []
     @param m bitarray hash of encrypted message.
     @param pub_key a tuple (n, d) composing private key of RSA cryptosystem.
  *)
-let decrypt_rsa m (n , d) = []
+let decrypt_rsa m (n, d) = []
 
 (********** ElGamal Cipher **********)
 
