@@ -100,9 +100,16 @@ let generate_keys_g (g, p) =
 
 let encrypt_g msg (g, p) kA =
   let rec get_random_k k =
-    if modulo k (p - 1) = 0 then k else get_random_k (k + 1)
+    print_string "searching for k = ";
+    print_int k;
+    print_newline ();
+    if modulo k (p - 1) = 0 then k else get_random_k (k - 1)
   in
-  let k = get_random_k 2 in
+  let k = get_random_k p in
+  print_string "found k = ";
+  print_newline ();
+  print_int k;
+  print_newline ();
   let a = mod_power g k p and b = modulo (power kA k * msg) p in
   (a, b)
 

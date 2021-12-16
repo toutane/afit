@@ -4,7 +4,7 @@ open Z
 
 (* Modular expnonentiation ; modulo a given natural number smaller
    max_int we never have integer-overflows if implemented properly.
- *)
+*)
 
 (** Fast modular exponentiation function. Logarithmic complexity.
     @param x base
@@ -15,7 +15,7 @@ let mod_power x n m = zero
 
 (* Making use of Fermat Little Theorem for very quick exponentation
    modulo prime number.
- *)
+*)
 
 (** Fast modular exponentiation function mod prime. Logarithmic complexity.
     It makes use of the Little Fermat Theorem.
