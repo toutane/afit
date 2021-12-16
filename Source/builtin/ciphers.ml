@@ -42,18 +42,14 @@ let decrypt_cesar k m b =
 *)
 let generate_keys_rsa p q =
   let n = p * q and phi = (p - 1) * (q - 1) and e = 3 in
-  print_int phi;
-  if gcd phi e != 1 then (
+  if gcd phi e != 1 then
     let rec find_e x = if gcd phi x == 1 then x else find_e (x + 2) in
     let new_e = find_e (e + 2) in
-    print_string "new e : ";
-    print_int new_e;
     let d, _, _ = bezout new_e phi in
-    ((n, new_e), (n, d)))
-  else (
-    print_string "e is good";
+    ((n, new_e), (n, d))
+  else
     let d, _, _ = bezout e phi in
-    ((n, e), (n, d)))
+    ((n, e), (n, d))
 
 (** Encryption using RSA cryptosystem.
     @param m integer hash of message
@@ -100,16 +96,9 @@ let generate_keys_g (g, p) =
 
 let encrypt_g msg (g, p) kA =
   let rec get_random_k k =
-    print_string "searching for k = ";
-    print_int k;
-    print_newline ();
     if modulo k (p - 1) = 0 then k else get_random_k (k - 1)
   in
   let k = get_random_k p in
-  print_string "found k = ";
-  print_newline ();
-  print_int k;
-  print_newline ();
   let a = mod_power g k p and b = modulo (power kA k * msg) p in
   (a, b)
 
