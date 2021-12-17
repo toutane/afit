@@ -50,18 +50,8 @@ let mod_power x n m =
     @param p prime modular base, a positive bitarray
  *)
 let prime_mod_power x n p =
-  if x = [] then []
-  else
-    let rec multi_mf x i =
-      if i = [] || i = diff_b p [ 0; 1 ] then [ 0; 1 ]
-      else
-        let k =
-          if mod_b i [ 0; 0; 1 ] = [] then
-            multi_mf (mult_b x x) (quot_b i [ 0; 0; 1 ])
-          else
-            mult_b x
-              (multi_mf (mult_b x x) (quot_b (diff_b i [ 0; 1 ]) [ 0; 0; 1 ]))
-        in
-        mod_b k p
-    in
-    multi_mf x n
+  if compare_b n [] < 0 then invalid_arg "prime_mod_power: n should be natural"
+  else if compare_b n [] = 0 then [ 0; 1 ]
+  else if compare_b (mod_b x p) [] <> 0 then
+    mod_power x (mod_b n (diff_b p [ 0; 1 ])) p
+  else mod_power x n p

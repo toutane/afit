@@ -24,16 +24,7 @@ let mod_power x n m = powm x n m
     @param p prime modular base
  *)
 let prime_mod_power x n p =
-  if equal x zero then zero
-  else
-    let rec multi_mf x i =
-      if equal i zero || equal i (p - one) then one
-      else
-        let k =
-          if equal (erem i (of_int 2)) zero then
-            multi_mf (x * x) (ediv i (of_int 2))
-          else x * multi_mf (x * x) (ediv (i - one) (of_int 2))
-        in
-        erem k p
-    in
-    multi_mf x n
+  if lt n zero then invalid_arg "prime_mod_power: n should be natural"
+  else if equal n zero then one
+  else if not (equal (erem x p) zero) then mod_power x (erem n (p - one)) p
+  else mod_power x n p

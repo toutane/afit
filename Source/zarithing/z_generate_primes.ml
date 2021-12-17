@@ -44,13 +44,21 @@ let eratosthenes n =
 (** Write a list into a file. Element seperator is newline.
     @param file path to write to.
  *)
-let write_list li file = ()
+let write_list li file =
+  let oc = open_out file in
+  let rec aux = function
+    | [] -> close_out oc
+    | e :: l ->
+        Printf.fprintf oc "%n\n" (to_int e);
+        aux l
+  in
+  aux li
 
 (** Write a list of prime numbers up to limit into a txt file.
     @param n limit of prime numbers up to which to build up a list of primes.
     @param file path to write to.
 *)
-let write_list_primes n file = ()
+let write_list_primes n file = write_list (eratosthenes n) file
 
 (** Read file safely ; catch End_of_file exception.
     @param in_c input channel.
@@ -60,12 +68,20 @@ let input_line_opt in_c = try Some (input_line in_c) with End_of_file -> None
 (** Create a list out of reading a line per line channel.
     @param in_c input channel.
  *)
-let create_list in_c = []
+let create_list in_c =
+  let rec _create_list in_c =
+    match input_line_opt in_c with
+    | Some line -> of_string line :: _create_list in_c
+    | None -> []
+  in
+  _create_list in_c
 
 (** Load list of primes into OCaml environment.
     @param file path to load from.
  *)
-let read_list_primes file = []
+let read_list_primes file =
+  let ic = open_in file in
+  create_list ic
 
 (* Auxiliary functions to extract big prime numbers for testing
    purposes.

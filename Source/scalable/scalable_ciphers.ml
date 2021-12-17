@@ -76,17 +76,10 @@ let generate_keys_g (g, p) =
  *)
 let encrypt_g msg (g, p) kA =
   let rec get_random_k k =
-    print_string "searching for k = ";
-    print_b k;
-    print_newline ();
     if to_int (mod_b k (diff_b p [ 0; 1 ])) = 0 then k
     else get_random_k (diff_b k [ 0; 1 ])
   in
   let k = get_random_k p in
-  print_string "found k = ";
-  print_newline ();
-  print_b k;
-  print_newline ();
   let a = mod_power g k p and b = mod_b (mult_b (power kA k) msg) p in
   (a, b)
 

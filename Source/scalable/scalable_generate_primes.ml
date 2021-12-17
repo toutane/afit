@@ -38,13 +38,25 @@ let eratosthenes n =
    seperator within elements of an element is ','.
    @param file path to write to.
 *)
-let write_list li file = ()
+let write_list li file =
+  let rec genStr = function
+    | [] -> "]"
+    | e :: l -> string_of_int e ^ ", " ^ genStr l
+  in
+  let oc = open_out file in
+  let rec aux = function
+    | [] -> close_out oc
+    | e :: l ->
+        Printf.fprintf oc "%s\n" ("[ " ^ genStr e);
+        aux l
+  in
+  aux li
 
 (** Write a list of prime numbers up to limit into a txt file.
     @param n limit of prime bitarrays up to which to build up a list of primes.
     @param file path to write to.
 *)
-let write_list_primes n file = ()
+let write_list_primes n file = write_list (eratosthenes n) file
 
 (** Read file safely ; catch End_of_file exception.
     @param in_c input channel.
@@ -53,12 +65,31 @@ let input_line_opt in_c = try Some (input_line in_c) with End_of_file -> None
 
 (** Create a list of bitarrays out of reading a line per line channel.
     @param in_c input channel.  *)
-let create_list in_c = ()
+let create_list in_c =
+  let inlist_to_string line =
+    let len = String.length line in
+    let rec decode i =
+      if i >= len then []
+      else
+        match line.[i] with
+        | '[' | ' ' | ',' | ']' -> decode (i + 1)
+        | c -> int_of_string (String.make 1 c) :: decode (i + 1)
+    in
+    decode 0
+  in
+  let rec _create_list in_c =
+    match input_line_opt in_c with
+    | Some line -> inlist_to_string line :: _create_list in_c
+    | None -> []
+  in
+  _create_list in_c
 
 (** Load list of prime bitarrays into OCaml environment.
     @param file path to load from.
  *)
-let read_list_primes file = []
+let read_list_primes file =
+  let ic = open_in file in
+  create_list ic
 
 (** Get last element of a list.
     @param l list of prime bitarrays.
